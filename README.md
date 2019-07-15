@@ -1,2 +1,3 @@
-# libra-data
-Libra is the codename for the curation tools
+# eridanus-data
+Eridanus is the codename for the notification service
+

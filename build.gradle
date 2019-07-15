@@ -1,0 +1,49 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.1.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+eclipse {
+    project.natures 'org.eclipse.buildship.core.gradleprojectnature'
+}
+
+
+jar {
+    baseName='eridanus-data'
+    version= '1.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+processResources {
+    filesMatching('application.properties') {
+        expand(project.properties)
+    }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-data-mongodb")
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("com.sun.mail:javax.mail:1.6.2")
+	testCompile("org.mockito:mockito-core")
+	testCompile("org.springframework.boot:spring-boot-starter-test")
+}
+
+springBoot {
+    mainClassName = "org.kpmp.eridanus.Application"
+}
