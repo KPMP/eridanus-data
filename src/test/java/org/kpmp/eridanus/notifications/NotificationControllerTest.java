@@ -1,7 +1,6 @@
 package org.kpmp.eridanus.notifications;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,9 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.kpmp.eridanus.notifications.NotificationController;
-import org.kpmp.eridanus.notifications.PackageNotificationEvent;
-import org.kpmp.eridanus.notifications.PackageNotificationEventService;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -36,17 +32,14 @@ public class NotificationControllerTest {
 
 	@Test
 	public void testNotifyNewPackage() {
-		PackageNotificationEvent initialEvent = new PackageNotificationEvent();
-		PackageNotificationEvent expectedEvent = mock(PackageNotificationEvent.class);
-		when(packageEventService.saveNotifyEvent(any(PackageNotificationEvent.class))).thenReturn(expectedEvent);
+		StateChangeEvent initialEvent = new StateChangeEvent();
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		when(request.getServerName()).thenReturn("test.kpmp.org");
-		when(packageEventService.sendNotifyEmail(expectedEvent)).thenReturn(true);
+		when(packageEventService.sendNotifyEmail(initialEvent)).thenReturn(true);
 
-		Boolean success = controller.notifyNewPackage(initialEvent, request);
+		Boolean success = controller.notify(initialEvent, request);
 
-		verify(packageEventService).saveNotifyEvent(initialEvent);
-		verify(packageEventService).sendNotifyEmail(expectedEvent);
+		verify(packageEventService).sendNotifyEmail(initialEvent);
 		assertEquals(true, success);
 	}
 
