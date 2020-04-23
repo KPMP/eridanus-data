@@ -1,10 +1,11 @@
 package org.kpmp.eridanus.notifications;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.After;
@@ -35,12 +36,22 @@ public class NotificationControllerTest {
 		StateChangeEvent initialEvent = new StateChangeEvent();
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		when(request.getServerName()).thenReturn("test.kpmp.org");
-		when(packageEventService.sendNotifyEmail(initialEvent)).thenReturn(true);
 
 		Boolean success = controller.notify(initialEvent, request);
 
-		verify(packageEventService).sendNotifyEmail(initialEvent);
 		assertEquals(true, success);
+	}
+
+	@Test
+	public void testNotifyNewPackage_whenException() throws Exception {
+		StateChangeEvent initialEvent = new StateChangeEvent();
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getServerName()).thenReturn("test.kpmp.org");
+		doThrow(new MessagingException()).when(packageEventService).sendNotifyEmail(initialEvent);
+
+		Boolean success = controller.notify(initialEvent, request);
+
+		assertEquals(false, success);
 	}
 
 }

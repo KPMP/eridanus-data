@@ -24,35 +24,25 @@ public class EmailSender {
 	@Value("${mail.host}")
 	private String host;
 
-	public boolean sendEmail(String subject, String body, List<String> toAddresses) {
+	public void sendEmail(String subject, String body, List<String> toAddresses) throws MessagingException {
 
-		boolean successful = false;
 		Properties properties = System.getProperties();
 		properties.setProperty("mail.smtp.host", host);
 		Session session = Session.getDefaultInstance(properties);
 
-		try {
-			MimeMessage message = new MimeMessage(session);
-			message.setFrom(fromAddress);
-			if (toAddresses.size() > 0) {
-				for (String to : toAddresses) {
-					message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-				}
-			} else {
-				log.error("No To adresses provided, unable to send message.");
-				return false;
+		MimeMessage message = new MimeMessage(session);
+		message.setFrom(fromAddress);
+		if (toAddresses.size() > 0) {
+			for (String to : toAddresses) {
+				message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
 			}
-			message.setSubject(subject);
-			message.setText(body);
-
-			Transport.send(message);
-			successful = true;
-
-		} catch (MessagingException exception) {
-			System.err.println(exception.getMessage());
-			log.error("Hit error sending email: {}", exception.getMessage());
+		} else {
+			throw new MessagingException("No To address provided. Unable to send message.");
 		}
+		message.setSubject(subject);
+		message.setText(body);
 
-		return successful;
+		Transport.send(message);
+
 	}
 }

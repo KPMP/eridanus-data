@@ -1,5 +1,6 @@
 package org.kpmp.eridanus.notifications;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -28,9 +29,14 @@ public class NotificationController {
 		log.info("URI: {} | MSG: {}", request.getRequestURI(),
 				"Sending notification for PKGID: " + event.getPackageId());
 
-		boolean emailSent = packageEventService.sendNotifyEmail(event);
+		try {
+			packageEventService.sendNotifyEmail(event);
+		} catch (MessagingException e) {
+			log.error(e.getMessage());
+			return false;
+		}
 
-		return emailSent;
+		return true;
 	}
 
 }

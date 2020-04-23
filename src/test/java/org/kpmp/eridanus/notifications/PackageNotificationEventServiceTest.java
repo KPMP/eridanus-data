@@ -2,6 +2,7 @@ package org.kpmp.eridanus.notifications;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -9,6 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import javax.mail.MessagingException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -59,11 +62,9 @@ public class PackageNotificationEventServiceTest {
 		submitter.setLastName("name");
 		packageInfo.setSubmitter(submitter);
 		packageInfo.setSubjectId("specimenId");
-		when(emailer.sendEmail(any(String.class), any(String.class), any(List.class))).thenReturn(true);
 
-		boolean result = service.sendNotifyEmail(packageEvent);
+		service.sendNotifyEmail(packageEvent);
 
-		assertEquals(true, result);
 		ArgumentCaptor<String> subjectCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<List> toAddressesCaptor = ArgumentCaptor.forClass(List.class);
@@ -81,6 +82,36 @@ public class PackageNotificationEventServiceTest {
 		List<String> toAddresses = toAddressesCaptor.getValue();
 		assertEquals(1, toAddresses.size());
 		assertEquals("rlreamy@umich.edu", toAddresses.get(0));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testSendNotifyEmail_successStateWhenException() throws Exception {
+		StateChangeEvent packageEvent = new StateChangeEvent();
+		packageEvent.setOrigin("upload.kpmp.org");
+		packageEvent.setState("success");
+		packageEvent.setPackageId("packageId");
+
+		Package packageInfo = new Package();
+		when(packageRepository.findByPackageId("packageId")).thenReturn(packageInfo);
+		Date dateSubmitted = new Date();
+		packageInfo.setCreatedAt(dateSubmitted);
+		packageInfo.setPackageId("packageId");
+		packageInfo.setPackageType("package type");
+		User submitter = new User();
+		submitter.setFirstName("submitter");
+		submitter.setLastName("name");
+		packageInfo.setSubmitter(submitter);
+		packageInfo.setSubjectId("specimenId");
+		doThrow(new MessagingException("BOOM")).when(emailer).sendEmail(any(String.class), any(String.class),
+				any(List.class));
+
+		try {
+			service.sendNotifyEmail(packageEvent);
+		} catch (MessagingException expected) {
+			assertEquals("BOOM", expected.getMessage());
+		}
+
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -103,11 +134,9 @@ public class PackageNotificationEventServiceTest {
 		submitter.setLastName("name");
 		packageInfo.setSubmitter(submitter);
 		packageInfo.setSubjectId("specimenId");
-		when(emailer.sendEmail(any(String.class), any(String.class), any(List.class))).thenReturn(true);
 
-		boolean result = service.sendNotifyEmail(packageEvent);
+		service.sendNotifyEmail(packageEvent);
 
-		assertEquals(true, result);
 		ArgumentCaptor<String> subjectCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<List> toAddressesCaptor = ArgumentCaptor.forClass(List.class);
@@ -125,6 +154,37 @@ public class PackageNotificationEventServiceTest {
 		List<String> toAddresses = toAddressesCaptor.getValue();
 		assertEquals(1, toAddresses.size());
 		assertEquals("rlreamy@umich.edu", toAddresses.get(0));
+	}
+
+	@SuppressWarnings({ "unchecked" })
+	@Test
+	public void testSendNotifyEmail_failStateWhenException() throws Exception {
+		StateChangeEvent packageEvent = new StateChangeEvent();
+		packageEvent.setOrigin("upload.kpmp.org");
+		packageEvent.setState("fail");
+		packageEvent.setPackageId("packageId");
+		packageEvent.setCodicil("could not do it");
+
+		Package packageInfo = new Package();
+		when(packageRepository.findByPackageId("packageId")).thenReturn(packageInfo);
+		Date dateSubmitted = new Date();
+		packageInfo.setCreatedAt(dateSubmitted);
+		packageInfo.setPackageId("packageId");
+		packageInfo.setPackageType("package type");
+		User submitter = new User();
+		submitter.setFirstName("submitter");
+		submitter.setLastName("name");
+		packageInfo.setSubmitter(submitter);
+		packageInfo.setSubjectId("specimenId");
+		doThrow(new MessagingException("BOOM")).when(emailer).sendEmail(any(String.class), any(String.class),
+				any(List.class));
+
+		try {
+			service.sendNotifyEmail(packageEvent);
+		} catch (MessagingException expected) {
+			assertEquals("BOOM", expected.getMessage());
+		}
+
 	}
 
 }

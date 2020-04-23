@@ -3,6 +3,8 @@ package org.kpmp.eridanus.notifications;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+import javax.mail.MessagingException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,21 +30,20 @@ public class PackageNotificationEventService {
 		this.packageRepository = packageRepository;
 	}
 
-	public boolean sendNotifyEmail(StateChangeEvent event) {
+	public void sendNotifyEmail(StateChangeEvent event) throws MessagingException {
 		Package packageInfo = packageRepository.findByPackageId(event.getPackageId());
 
 		String packageState = event.getState();
 		if (packageState.equalsIgnoreCase(uploadSuccess)) {
-			return sendSuccessEmail(packageInfo, event);
+			sendSuccessEmail(packageInfo, event);
 		} else if (packageState.equalsIgnoreCase(uploadFail)) {
-			return sendFailureEmail(packageInfo, event);
+			sendFailureEmail(packageInfo, event);
 		}
 		log.info("URI: PackageNotificationEventService.sendNotifyEmail | PKGID: {} | MSG: {}", event.getPackageId(),
 				"No notifications defined for this state: " + packageState);
-		return false;
 	}
 
-	private boolean sendSuccessEmail(Package packageInfo, StateChangeEvent event) {
+	private void sendSuccessEmail(Package packageInfo, StateChangeEvent event) throws MessagingException {
 		String dateFormat = "yyyy-MM-dd";
 		SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
 
@@ -59,10 +60,10 @@ public class PackageNotificationEventService {
 		body.append("Link to data lake uploader: http://" + event.getOrigin() + "\n");
 		body.append("\n\nThanks!\nYour friendly notification service.");
 
-		return emailer.sendEmail("New package for your review from " + event.getOrigin(), body.toString(), toAddresses);
+		emailer.sendEmail("New package for your review from " + event.getOrigin(), body.toString(), toAddresses);
 	}
 
-	private boolean sendFailureEmail(Package packageInfo, StateChangeEvent event) {
+	private void sendFailureEmail(Package packageInfo, StateChangeEvent event) throws MessagingException {
 		String dateFormat = "yyyy-MM-dd";
 		SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
 
@@ -79,8 +80,7 @@ public class PackageNotificationEventService {
 		body.append("Link to data lake uploader: http://" + event.getOrigin() + "\n");
 		body.append("\n\nThanks!\nYour friendly notification service.");
 
-		return emailer.sendEmail("FAILED package for your review from " + event.getOrigin(), body.toString(),
-				toAddresses);
+		emailer.sendEmail("FAILED package for your review from " + event.getOrigin(), body.toString(), toAddresses);
 	}
 
 }
