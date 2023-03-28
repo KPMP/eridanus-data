@@ -7,11 +7,19 @@ buildscript {
     }
 }
 
+plugins {
+    id 'com.palantir.docker' version '0.22.1'
+}
+
+group = 'kingstonduo'
+version = "latest"
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.palantir.docker'
 
 eclipse {
     project.natures 'org.eclipse.buildship.core.gradleprojectnature'
@@ -47,4 +55,16 @@ dependencies {
 
 springBoot {
     mainClass = "org.kpmp.eridanus.Application"
+}
+
+task unpack(type: Copy) {
+    dependsOn bootJar
+    from(zipTree(tasks.bootJar.outputs.files.singleFile))
+    into("build/dependency")
+}
+
+docker {
+    name "${project.group}/${jar.baseName}:${project.version}"
+    copySpec.from(tasks.unpack.outputs).into("dependency")
+    buildArgs(['DEPENDENCY': "dependency"])
 }
