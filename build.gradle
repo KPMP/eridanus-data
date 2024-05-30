@@ -85,7 +85,7 @@ def getCurrentGitBranch() {
 }
 
 docker {
-    name "kingstonduo/eridanus-spring" + getCurrentGitBranch()
+    name "kingstonduo/eridanus-spring:" + getCurrentGitBranch()
     copySpec.from(tasks.unpack.outputs).into("dependency")
     buildArgs(['DEPENDENCY': "dependency"])
 }
