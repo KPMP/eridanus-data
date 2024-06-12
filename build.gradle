@@ -27,6 +27,11 @@ eclipse {
     project.natures 'org.eclipse.buildship.core.gradleprojectnature'
 }
 
+
+jar {
+    baseName='eridanus-data'
+}
+
 repositories {
     mavenCentral()
 }
