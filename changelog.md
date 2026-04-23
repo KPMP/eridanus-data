@@ -1,6 +1,10 @@
 # Changelog
 
-## Release 4.1 [unreleased]
+## Release 4.2 
+Brief summary of what's in this release:
+- Nothing new, just keeping version numbers in sync
+
+## Release 4.1 [Released 9/2/2025]
 Brief summary of what's in this release:
 - upgrade to Java 21
 
